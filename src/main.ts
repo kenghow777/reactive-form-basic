@@ -64,10 +64,7 @@ import {
 })
 export class App {
   profileForm = this.fb.group({
-    username: [
-      '',
-      { validators: [Validators.required, Validators.minLength(2)] },
-    ],
+    username: [''],
     password: [''],
     address: this.fb.group({
       street: [''],
@@ -77,12 +74,12 @@ export class App {
     }),
     dateTimeValid: this.fb.group(
       {
-        startDate: [''],
-        endDate: [''],
-        startTime: [''],
-        endTime: [''],
+        startDate: ['', Validators.required],
+        endDate: ['', Validators.required],
+        startTime: ['', Validators.required],
+        endTime: ['', Validators.required],
       },
-      { validators: [this.dateValidator, Validators.required] }
+      { validators: this.dateValidator }
     ),
   });
   constructor(private fb: FormBuilder) {}
@@ -92,19 +89,35 @@ export class App {
   }
 
   dateValidator(group: FormGroup): { [key: string]: any } | null {
-    const startDate = new Date(group.get('startDate')!.value);
-    const endDate = new Date(group.get('endDate')!.value);
+    const startDateStr = new Date(group.get('startDate')!.value);
+    const endDateStr = new Date(group.get('endDate')!.value);
 
     const startHour = group.get('startTime')!.value;
     const endHour = group.get('endTime')!.value;
 
+    if (!startDateStr || !endDateStr || !startHour || !endHour) {
+      return null;
+    }
+
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+
     const [startHourParsed, startMinutesParsed] = startHour.split(':');
     const [endHourParsed, endMinutesParsed] = endHour.split(':');
+
+    if (
+      !startHourParsed ||
+      !startMinutesParsed ||
+      !endHourParsed ||
+      !endMinutesParsed
+    ) {
+      return null;
+    }
 
     startDate.setHours(parseInt(startHourParsed), parseInt(startMinutesParsed));
     endDate.setHours(parseInt(endHourParsed), parseInt(endMinutesParsed));
 
-    return startDate > endDate ? { invalidPeriod: true } : null;
+    return startDate >= endDate ? { invalidPeriod: true } : null;
   }
 }
 
