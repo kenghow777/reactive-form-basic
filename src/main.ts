@@ -22,7 +22,7 @@ import {
       <div>
         <input type="password" placeholder="Password" formControlName="password" />
       </div>
-      <div>
+      <div formGroupName="address">
         <h3>Address</h3>
         <div>
           <input type="text" placeholder="Street" formControlName="street" />
@@ -37,7 +37,7 @@ import {
           <input type="text" placeholder="Zip Code" formControlName="zip" />
         </div>
       </div>
-      <div>
+      <div formGroupName="dateTimeValid">
         <h3>Date-Time</h3>
         <div>
           <input type="date" placeholder="Start Date" formControlName="startDate" />
@@ -58,13 +58,16 @@ import {
       <div *ngIf="profileForm.errors?.invalidPeriod">Start datetime must be before the end datetime.</div>
 
       <h2>Result:</h2>
-      <p>{{profileForm.value | json}}</p>
+      <pre><p>{{profileForm.value | json}}</p></pre>
     </div>
   `,
 })
 export class App {
   profileForm = this.fb.group({
-    username: ['', [Validators.required, Validators.minLength(2)]],
+    username: [
+      '',
+      { validators: [Validators.required, Validators.minLength(2)] },
+    ],
     password: [''],
     address: this.fb.group({
       street: [''],
@@ -79,7 +82,7 @@ export class App {
         startTime: [''],
         endTime: [''],
       },
-      { Validators: this.dateValidator }
+      { validators: [this.dateValidator, Validators.required] }
     ),
   });
   constructor(private fb: FormBuilder) {}
@@ -99,7 +102,7 @@ export class App {
     const [endHourParsed, endMinutesParsed] = endHour.split(':');
 
     startDate.setHours(parseInt(startHourParsed), parseInt(startMinutesParsed));
-    startDate.setHours(parseInt(endHourParsed), parseInt(endMinutesParsed));
+    endDate.setHours(parseInt(endHourParsed), parseInt(endMinutesParsed));
 
     return startDate > endDate ? { invalidPeriod: true } : null;
   }
